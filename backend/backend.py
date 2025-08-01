@@ -7,6 +7,8 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 import io
+import requests
+import re
 
 # -------------------------------
 # Setup Logging
@@ -46,6 +48,11 @@ class_names = [
     'weevil'
 ]
 
+# -------------------------------
+# LLM Config
+# -------------------------------
+LM_STUDIO_URL = "http://localhost:1234/v1/chat/completions"
+MODEL_NAME = "deepseek/deepseek-r1-0528-qwen3-8b"
 
 app = FastAPI()
 
@@ -80,6 +87,23 @@ def preprocess_image(image_bytes):
 # Endpoint: /predict
 # -------------------------------
 @app.post("/predict")
+
+    # Construct a prompt for the LLM
+    prompt = f"""
+    You are an expert in organic farming and pest management.
+    An image of a {crop} crop was classified as: {predicted_class} (confidence {confidence:.1%}).
+    
+    Please provide:
+    1. A short explanation of this pest and its impact on {crop}.
+    2. Organic treatment steps (non-chemical).
+    3. Prevention tips for farmers.
+    
+    Format:
+    - Diagnosis:
+    - Treatment:
+    - Prevention:
+    """
+
 async def predict(file: UploadFile = File(...), crop: str = Form(...)):
     try:
         logger.info(f"📥 Received file: {file.filename}, Crop: {crop}")
@@ -99,8 +123,34 @@ async def predict(file: UploadFile = File(...), crop: str = Form(...)):
 
         # Crop-specific logic
         crop_context_status = f"Insect is {'harmful' if predicted_class != 'spider_mite' else 'beneficial'} to {crop}"
-        llm_response = f"The insect '{predicted_class}' is considered {'harmful' if predicted_class != 'spider_mite' else 'beneficial'} for {crop} crops. Please monitor accordingly."
+        # llm_response = f"The insect '{predicted_class}' is considered {'harmful' if predicted_class != 'spider_mite' else 'beneficial'} for {crop} crops. Please monitor accordingly."
         logger.info("🧠 Generated LLM response. \n =========================================")
+
+        try:
+            lm_payload = {
+                "model": MODEL_NAME,
+                "messages": [
+                    {"role": "system", "content": "Answer concisely and avoid <think> tags."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.2
+            }
+        
+            lm_response = requests.post(LM_STUDIO_URL, json=lm_payload)
+            lm_response.raise_for_status()
+            lm_data = lm_response.json()
+        
+            # Extract response text
+            content = lm_data["choices"][0]["message"]["content"]
+        
+            # Strip out <think> sections
+            content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+        
+            llm_response = content
+        
+        except Exception as e:
+            logger.error(f"LLM request failed: {e}")
+            llm_response = "Could not generate LLM explanation."
 
         return {
             "predicted_class": predicted_class,
