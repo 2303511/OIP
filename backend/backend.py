@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 # Load Model
 # -------------------------------
 try:
-    model = tf.keras.models.load_model("custom_pest_model.h5")
+    model = tf.keras.models.load_model("agricultural_pest_model_phase1.h5")
     logger.info(f" Model architecture: {model.summary()}")
     logger.info("✅ Model loaded successfully.")
 except Exception as e:
@@ -64,16 +64,17 @@ app.add_middleware(
 # Helper: Preprocess Image
 # -------------------------------
 def preprocess_image(image_bytes):
-    logger.info("📷 Preprocessing image for CNN input (160x160x3)...")
+    logger.info("📷 Preprocessing image for CNN input (224x224x3)...")
 
     img = Image.open(io.BytesIO(image_bytes)).convert('RGB')  # Keep 3 channels
-    img = img.resize((160, 160))                              # Match model input
+    img = img.resize((224, 224))                              # Match model input
 
     img_array = np.array(img) / 255.0                         # Normalize to [0, 1]
-    img_array = np.expand_dims(img_array, axis=0)             # Add batch dimension → (1, 160, 160, 3)
+    img_array = np.expand_dims(img_array, axis=0)             # Add batch dimension → (1, 224, 224, 3)
 
     logger.info(f"✅ Preprocessed image shape: {img_array.shape}")
     return img_array
+
 
 # -------------------------------
 # Endpoint: /predict
@@ -99,7 +100,7 @@ async def predict(file: UploadFile = File(...), crop: str = Form(...)):
         # Crop-specific logic
         crop_context_status = f"Insect is {'harmful' if predicted_class != 'spider_mite' else 'beneficial'} to {crop}"
         llm_response = f"The insect '{predicted_class}' is considered {'harmful' if predicted_class != 'spider_mite' else 'beneficial'} for {crop} crops. Please monitor accordingly."
-        logger.info("🧠 Generated LLM response.")
+        logger.info("🧠 Generated LLM response. \n =========================================")
 
         return {
             "predicted_class": predicted_class,
