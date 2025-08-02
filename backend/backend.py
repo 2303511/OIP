@@ -82,27 +82,10 @@ def preprocess_image(image_bytes):
     logger.info(f"✅ Preprocessed image shape: {img_array.shape}")
     return img_array
 
-
 # -------------------------------
 # Endpoint: /predict
 # -------------------------------
 @app.post("/predict")
-
-    # Construct a prompt for the LLM
-    prompt = f"""
-    You are an expert in organic farming and pest management.
-    An image of a {crop} crop was classified as: {predicted_class} (confidence {confidence:.1%}).
-    
-    Please provide:
-    1. A short explanation of this pest and its impact on {crop}.
-    2. Organic treatment steps (non-chemical).
-    3. Prevention tips for farmers.
-    
-    Format:
-    - Diagnosis:
-    - Treatment:
-    - Prevention:
-    """
 
 async def predict(file: UploadFile = File(...), crop: str = Form(...)):
     try:
@@ -126,6 +109,23 @@ async def predict(file: UploadFile = File(...), crop: str = Form(...)):
         # llm_response = f"The insect '{predicted_class}' is considered {'harmful' if predicted_class != 'spider_mite' else 'beneficial'} for {crop} crops. Please monitor accordingly."
         logger.info("🧠 Generated LLM response. \n =========================================")
 
+        # ---- Construct LLM prompt here (AFTER prediction) ----
+        prompt = f"""
+        You are an expert in organic farming and pest management.
+        An image of a {crop} crop was classified as: {predicted_class} (confidence {confidence:.1%}).
+        
+        Please provide:
+        1. A short explanation of this pest and its impact on {crop}.
+        2. Organic treatment steps (non-chemical).
+        3. Prevention tips for farmers.
+        
+        Format:
+        - Diagnosis:
+        - Treatment:
+        - Prevention:
+        """
+
+        # ---- Call LLM ----
         try:
             lm_payload = {
                 "model": MODEL_NAME,
