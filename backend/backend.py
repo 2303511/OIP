@@ -9,6 +9,10 @@ import tensorflow as tf
 import io
 import requests
 import re
+from PIL import Image
+import numpy as np
+import io
+from tensorflow.keras.applications.efficientnet_v2 import preprocess_input
 
 # -------------------------------
 # Setup Logging
@@ -26,8 +30,8 @@ logger = logging.getLogger(__name__)
 # Load Model
 # -------------------------------
 try:
-    model = tf.keras.models.load_model("agricultural_pest_model_phase1.h5")
-    logger.info(f" Model architecture: {model.summary()}")
+    model = tf.keras.models.load_model("best_model.keras")
+    model.summary(print_fn=lambda x: logger.info(x))  # Log summary nicely
     logger.info("✅ Model loaded successfully.")
 except Exception as e:
     logger.error(f"❌ Failed to load model: {e}")
@@ -70,14 +74,23 @@ app.add_middleware(
 # -------------------------------
 # Helper: Preprocess Image
 # -------------------------------
-def preprocess_image(image_bytes):
-    logger.info("📷 Preprocessing image for CNN input (224x224x3)...")
+def preprocess_image(image_bytes, img_size=224):
+    logger.info(f"📷 Preprocessing image for EfficientNetV2 ({img_size}x{img_size}x3)...")
 
-    img = Image.open(io.BytesIO(image_bytes)).convert('RGB')  # Keep 3 channels
-    img = img.resize((224, 224))                              # Match model input
+    # Load image from bytes and convert to RGB
+    img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
 
-    img_array = np.array(img) / 255.0                         # Normalize to [0, 1]
-    img_array = np.expand_dims(img_array, axis=0)             # Add batch dimension → (1, 224, 224, 3)
+    # Resize to model's expected input
+    img = img.resize((img_size, img_size))
+
+    # Convert to NumPy array
+    img_array = np.array(img).astype("float32")
+
+    # Add batch dimension → (1, H, W, C)
+    img_array = np.expand_dims(img_array, axis=0)
+
+    # Apply EfficientNetV2 preprocessing (no-op but kept for consistency)
+    img_array = preprocess_input(img_array)
 
     logger.info(f"✅ Preprocessed image shape: {img_array.shape}")
     return img_array

@@ -3,3 +3,5 @@ node_modules/
 
 # Ignore all .h5 files
 *.h5
+
+*.keras
