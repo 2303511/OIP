@@ -1,5 +1,6 @@
 // src/App.jsx
 import React, { useState } from 'react';
+import ReactMarkdown from "react-markdown";
 
 function App() {
   const [file, setFile] = useState(null);
@@ -81,7 +82,10 @@ function App() {
           <p><strong>Insect:</strong> {result.predicted_class}</p>
           <p><strong>Confidence:</strong> {Math.round(result.confidence * 100)}%</p>
           <p><strong>Crop Context:</strong> {result.crop_context_status}</p>
-          <p><strong>LLM Response:</strong><br />{result.llm_response}</p>
+          <div>
+            <strong>LLM Response:</strong>
+            <ReactMarkdown>{result.llm_response}</ReactMarkdown>
+          </div>
         </div>
       )}
     </div>
