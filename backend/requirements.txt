@@ -1,0 +1,7 @@
+fastapi==0.116.1
+numpy==2.3.2
+Pillow==11.3.0
+Requests==2.32.4
+tensorflow==2.19.0
+tensorflow_intel==2.18.0
+uvicorn==0.35.0
