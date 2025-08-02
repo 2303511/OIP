@@ -6,11 +6,19 @@
 4. Run the backend:
 
 # To be edited
-Run backend 'uvicorn backend:app --reload --port 8000'
-Run frotnend 'npm start'
+Run backend 'uvicorn backend:app --reload --port 8000' -> backend dir
+Run frotnend 'npm start' (Pre-requiste: run the command 'npm install') -> client dir
 
-To be edited for LLM engine portion -- need user to download locally and run the server.
+
 ```bash
 cd backend
 pip install -r requirements.txt
-python app.py
+uvicorn backend:app --reload --port 8000
+```
+
+Second Command Prompt
+```bash
+cd client
+npm install
+npm start
+
