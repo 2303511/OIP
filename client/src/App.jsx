@@ -1,6 +1,6 @@
-// src/App.jsx
 import React, { useState } from 'react';
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown from 'react-markdown';
+import './App.css';
 
 function App() {
   const [file, setFile] = useState(null);
@@ -49,45 +49,48 @@ function App() {
   };
 
   return (
-    <div style={{ padding: 30, fontFamily: 'Arial', maxWidth: 600, margin: 'auto' }}>
-      <h2>🌿 Insect Identifier</h2>
+    <div className="app-container">
+      <div className="card">
+        <h1>🪲 Insect Identifier</h1>
 
-      <input type="file" accept="image/*" onChange={handleFileChange} /><br /><br />
+        <input type="file" accept="image/*" onChange={handleFileChange} className="file-input" />
 
-      <img
-        src={imagePreview || "https://via.placeholder.com/300x200.png?text=Upload+Insect+Image"}
-        alt="Preview"
-        style={{ width: '100%', maxHeight: 300, objectFit: 'contain' }}
-      />
-
-      <br /><br />
-      <label>
-        Crop type:&nbsp;
-        <select value={crop} onChange={e => setCrop(e.target.value)}>
-          <option value="tomato">Tomato</option>
-          <option value="corn">Corn</option>
-          <option value="soybean">Soybean</option>
-        </select>
-      </label>
-
-      <br /><br />
-      <button onClick={handleUpload}>Upload and Identify</button>
-
-      {loading && <p>🔍 Processing image... please wait.</p>}
-      {error && <p style={{ color: 'red' }}>⚠️ {error}</p>}
-
-      {result && (
-        <div style={{ marginTop: 20, border: '1px solid #ccc', padding: 20, borderRadius: 8 }}>
-          <h3>✅ Identification Result</h3>
-          <p><strong>Insect:</strong> {result.predicted_class}</p>
-          <p><strong>Confidence:</strong> {Math.round(result.confidence * 100)}%</p>
-          <p><strong>Crop Context:</strong> {result.crop_context_status}</p>
-          <div>
-            <strong>LLM Response:</strong>
-            <ReactMarkdown>{result.llm_response}</ReactMarkdown>
-          </div>
+        <div className="image-preview">
+          <img
+            src={imagePreview || 'https://via.placeholder.com/400x250.png?text=Upload+Insect+Image'}
+            alt="Preview"
+          />
         </div>
-      )}
+
+        <label className="label">
+          Crop Type:
+          <select value={crop} onChange={(e) => setCrop(e.target.value)} className="select-input">
+            <option value="tomato">Tomato</option>
+            <option value="corn">Corn</option>
+            <option value="soybean">Soybean</option>
+          </select>
+        </label>
+
+        <button onClick={handleUpload} className="upload-btn">
+          🚀 Upload & Identify
+        </button>
+
+        {loading && <p className="loading">🔍 Processing image...</p>}
+        {error && <p className="error">⚠️ {error}</p>}
+
+        {result && (
+          <div className="result">
+            <h3>✅ Identification Result</h3>
+            <p><strong>Insect:</strong> {result.predicted_class}</p>
+            <p><strong>Confidence:</strong> {Math.round(result.confidence * 100)}%</p>
+            <p><strong>Crop Context:</strong> {result.crop_context_status}</p>
+            <div className="markdown">
+              <strong>LLM Response:</strong>
+              <ReactMarkdown>{result.llm_response}</ReactMarkdown>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
