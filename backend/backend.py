@@ -118,7 +118,7 @@ async def predict(file: UploadFile = File(...), crop: str = Form(...)):
         logger.info(f"✅ Predicted: {predicted_class} ({confidence:.2f})")
 
         # Crop-specific logic
-        crop_context_status = f"Insect is {'harmful' if predicted_class != 'spider_mite' else 'beneficial'} to {crop}"
+        # crop_context_status = f"Insect is {'harmful' if predicted_class != 'spider_mite' else 'beneficial'} to {crop}"
         # llm_response = f"The insect '{predicted_class}' is considered {'harmful' if predicted_class != 'spider_mite' else 'beneficial'} for {crop} crops. Please monitor accordingly."
         logger.info("🧠 Generated LLM response. \n =========================================")
 
@@ -128,11 +128,13 @@ async def predict(file: UploadFile = File(...), crop: str = Form(...)):
         An image of a {crop} crop was classified as: {predicted_class} (confidence {confidence:.1%}).
         
         Please provide:
-        1. A short explanation of this pest and its impact on {crop}.
-        2. Organic treatment steps (non-chemical).
-        3. Prevention tips for farmers.
-        
+        1. The crop context in one short sentence: "Insect is harmful or beneficial to {crop}".
+        2. A short explanation of this pest and its impact on {crop}.
+        3. Organic treatment steps (non-chemical).
+        4. Prevention tips for farmers.
+
         Format:
+        - Crop Context:
         - Diagnosis:
         - Treatment:
         - Prevention:
@@ -168,7 +170,7 @@ async def predict(file: UploadFile = File(...), crop: str = Form(...)):
         return {
             "predicted_class": predicted_class,
             "confidence": confidence,
-            "crop_context_status": crop_context_status,
+            # "crop_context_status": crop_context_status,
             "llm_response": llm_response
         }
 

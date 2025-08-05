@@ -83,7 +83,6 @@ function App() {
             <h3>✅ Identification Result</h3>
             <p><strong>Insect:</strong> {result.predicted_class}</p>
             <p><strong>Confidence:</strong> {Math.round(result.confidence * 100)}%</p>
-            <p><strong>Crop Context:</strong> {result.crop_context_status}</p>
             <div className="markdown">
               <strong>LLM Response:</strong>
               <ReactMarkdown>{result.llm_response}</ReactMarkdown>
